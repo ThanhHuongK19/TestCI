@@ -1,147 +1,80 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
 
-namespace NUnitTest
-{
-    public class Functions
-    {
-        public static double Devide(double a, double b)
-        {
-            return a / b;
-        }
+# This workflow will build, test, sign and package a WPF or Windows Forms desktop application
+# built on .NET Core.
+# To learn how to migrate your existing application to .NET Core,
+# refer to https://docs.microsoft.com/en-us/dotnet/desktop-wpf/migration/convert-project-from-net-framework
+#
+# To configure this workflow:
+#
+# 1. Configure environment variables
+# GitHub sets default environment variables for every workflow run.
+# Replace the variables relative to your project in the "env" section below.
+#
+# 2. Signing
+# Generate a signing certificate in the Windows Application
+# Packaging Project or add an existing signing certificate to the project.
+# Next, use PowerShell to encode the .pfx file using Base64 encoding
+# by running the following Powershell script to generate the output string:
+#
+# $pfx_cert = Get-Content '.\SigningCertificate.pfx' -Encoding Byte
+# [System.Convert]::ToBase64String($pfx_cert) | Out-File 'SigningCertificate_Encoded.txt'
+#
+# Open the output file, SigningCertificate_Encoded.txt, and copy the
+# string inside. Then, add the string to the repo as a GitHub secret
+# and name it "Base64_Encoded_Pfx."
+# For more information on how to configure your signing certificate for
+# this workflow, refer to https://github.com/microsoft/github-actions-for-desktop-apps#signing
+#
+# Finally, add the signing certificate password to the repo as a secret and name it "Pfx_Key".
+# See "Build the Windows Application Packaging project" below to see how the secret is used.
+#
+# For more information on GitHub Actions, refer to https://github.com/features/actions
+# For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
+# refer to https://github.com/microsoft/github-actions-for-desktop-apps
 
-        // Hàm kiểm tra số nguyên tố 
-        public static bool IsPrime(int num)
-        {
-            if (num <= 1)
-            {
-                return false;
-            }
-            for (int i = 2; i <= Math.Sqrt(num); i++)
-            {
-                if (num % i == 0)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+name: .NET Core Desktop
 
-        // Hàm kiểm tra số chẵn
-        public static bool IsEven(int num)
-        {
-            return num % 2 == 0;
-        }
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-        // Dãy Fibonacci
-        public static BigInteger Fibonacci(int n)
-        {
-            if (n < 1 || n > 10000)
-            {
-                throw new ArgumentException("Invalid argument");
-            }
+jobs:
 
-            BigInteger[] memo = new BigInteger[n + 1];
-            memo[0] = 0;
-            memo[1] = 1;
+  build:
 
-            for (int i = 2; i <= n; i++)
-            {
-                memo[i] = memo[i - 1] + memo[i - 2];
-            }
-            return memo[n];
-        }
+    strategy:
+      matrix:
+        configuration: [Release]
 
-        //Kiểm tra số có phải số Amstrong không
-        public static bool IsArmstrongNumber(int n)
-        {
-            if (n < 0) return false;
+    runs-on: windows-latest  # For a list of available runner types, refer to
+                             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
-            int sum = 0;
-            int original = n;
-            int numberOfDigits = n.ToString().Length;
+    env:
+      Solution_Name: CIProject.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
+      Test_Project_Path: NUnitProject\NUnitProject.csproj                 # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
 
-            while (n > 0)
-            {
-                int digit = n % 10;
-                sum += (int)Math.Pow(digit, numberOfDigits);
-                n /= 10;
-            }
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-            return sum == original;
-        }
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
-        // Hàm kiểm tra số hoàn hảo
-        public static bool IsPerfectNumber(int num)
-        {
-            int sum = 0;
-            for (int i = 1; i <= num / 2; i++)
-            {
-                if (num % i == 0)
-                {
-                    sum += i;
-                }
-            }
-            return sum == num;
-        }
+    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
 
-        // Hàm kiểm tra số đối xứng (Palindrome Number)
-        public static bool IsPalindrome(long num)
-        {
-            long original = num, reversed = 0;
-            while (num > 0)
-            {
-                long digit = num % 10;
-                reversed = reversed * 10 + digit;
-                num /= 10;
-            }
-            return original == reversed;
-        }
-
-        public static string GradeStudent(double score)
-        {
-
-            if (score < 0 || score > 100)
-
-            {
-
-                throw new ArgumentOutOfRangeException(nameof(score), "Score must be between 0 and 100.");
-            }
-
-            if (score >= 90) return "A";
-
-            if (score >= 80) return "B"; if (score >= 70) return "C";
-
-            if (score >= 60) return "D";
-
-            return "F";
-        }
-        // Hàm kiểm tra số thập phân
-
-        public static bool IsDecimal(string str)
-
-        {
-
-            if (string.IsNullOrEmpty(str)) return false;
-
-            return double.TryParse(str, out _) && str.Contains(".");
-        }
-
-        static void Main(string[] args)
-        {
-            // Example usage of the functions
-            Console.WriteLine("Is 5 prime? " + IsPrime(5)); // True
-            Console.WriteLine("Is 4 even? " + IsEven(4)); // True
-            Console.WriteLine("Fibonacci of 10: " + Fibonacci(10)); // 55
-            Console.WriteLine("Is 153 an Armstrong number? " + IsArmstrongNumber(153)); // True
-            Console.WriteLine("Is 6 a perfect number? " + IsPerfectNumber(6)); // True
-            Console.WriteLine("Is 121 a palindrome? " + IsPalindrome(121)); // True
-            Console.WriteLine("Grade for score 85: " + GradeStudent(85)); // B
-            Console.WriteLine("Is '3.14' a decimal? " + IsDecimal("3.14")); // True
-        }
-    }
-}
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test
